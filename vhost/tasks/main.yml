@@ -1,0 +1,37 @@
+---
+
+- name: document root for {{ servername }}
+  file:
+    path: /var/www/{{ php_pool }}/www
+    state: directory
+    owner: "{{ login }}"
+    group: "{{ group }}"
+
+- name: tmp dir for {{ servername }}
+  file:
+    path: /var/www/{{ php_pool }}/tmp
+    state: directory
+    mode: 01777
+
+- name: special tmp directories for {{ servername }}
+  file:
+    path: /var/www/{{ php_pool }}/tmp/{{ item }}
+    state: directory
+    mode: 01777
+  with_items:
+    - session
+    - wsdlcache
+    - opcache
+
+- name: put apache in users group
+  user:
+    name: apache
+    groups: "{{ group }}"
+    append: yes
+  notify: reload apache
+
+- name: virtual host {{ servername }} is configured
+  template:
+    src: vhost.conf.j2
+    dest: /opt/rh/httpd24/root/etc/httpd/conf.vhosts.d/{{ servername }}.conf
+  notify: reload apache

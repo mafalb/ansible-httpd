@@ -1,0 +1,15 @@
+
+<VirtualHost *:80>
+    ServerName {{ servername }}
+    DocumentRoot /var/www/{{ php_pool }}/www
+    <Proxy "fcgi://{{ servername }}/" enablereuse=on>
+    </Proxy>
+    <Directory /var/www/{{ php_pool }}/www>
+        Require all granted
+        <FilesMatch "\.php$">
+            <If "-f %{REQUEST_FILENAME}">
+                SetHandler "proxy:unix:///var/opt/rh/rh-php70/run/{{ php_pool }}.sock|fcgi://{{ servername }}/
+            </If>
+        </FilesMatch>
+    </Directory>
+</VirtualHost>

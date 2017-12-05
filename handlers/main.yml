@@ -1,0 +1,6 @@
+---
+
+- name: reload apache
+  service:
+    name: httpd24-httpd
+    state: reloaded

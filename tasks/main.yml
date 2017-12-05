@@ -1,0 +1,73 @@
+---
+- name: httpd is installed
+  package:
+    name: httpd24
+    state: installed
+
+- name: logical volume for apache exists
+  lvol:
+    lv: www
+    vg: lvm.{{inventory_hostname}}
+    size: 1g
+
+- name: create filesystem for apache
+  filesystem:
+    dev: /dev/lvm.{{inventory_hostname}}/www
+    fstype: xfs
+
+- name: mount point exists
+  file:
+    path: /var/www
+    state: directory
+    setype: httpd_sys_content_t
+
+- name: mount apache partition
+  mount:
+    src: /dev/lvm.{{inventory_hostname}}/www
+    path: /var/www
+    state: mounted
+    fstype: xfs
+    opts: defaults,nodev,nosuid
+
+- name: mount point exists
+  file:
+    path: /var/www
+    state: directory
+    setype: httpd_sys_content_t
+
+#- name: bind mount
+#  mount:
+#    name: /opt/rh/httpd24/root/var/www
+#    src: /var/www
+#    opts: bind
+#    fstype: none
+#    state: mounted
+
+- name: resize data filesystem for apache
+  filesystem:
+    dev: /dev/lvm.{{inventory_hostname}}/www
+    fstype: xfs
+    resizefs: yes
+
+- name: symlink in /etc
+  file:
+    src: /opt/rh/httpd24/root/etc/httpd
+    dest: /etc/opt/httpd24
+    state: link
+
+- name: directory for vhost config
+  file:
+    path: /opt/rh/httpd24/root/etc/httpd/conf.vhosts.d
+    state: directory
+
+- name: apache is running
+  service:
+    name: httpd24-httpd
+    state: started
+    enabled: true
+
+- name: vhosts.conf
+  template:
+    src: vhosts.conf
+    dest: /opt/rh/httpd24/root/etc/httpd/conf.d/vhosts.conf
+  notify: reload apache
