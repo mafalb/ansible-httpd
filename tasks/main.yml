@@ -35,14 +35,6 @@
     state: directory
     setype: httpd_sys_content_t
 
-#- name: bind mount
-#  mount:
-#    name: /opt/rh/httpd24/root/var/www
-#    src: /var/www
-#    opts: bind
-#    fstype: none
-#    state: mounted
-
 - name: resize data filesystem for apache
   filesystem:
     dev: /dev/lvm.{{inventory_hostname}}/www
