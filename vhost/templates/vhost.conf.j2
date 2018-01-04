@@ -5,6 +5,7 @@
     <Proxy "fcgi://{{ servername }}/" enablereuse=on>
     </Proxy>
     <Directory /var/www/{{ php_pool }}/www>
+        AllowOverride {{ vhost_allow_override | default('None') }}
         Require all granted
         <FilesMatch "\.php$">
             <If "-f %{REQUEST_FILENAME}">
