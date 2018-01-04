@@ -12,12 +12,14 @@
     path: /var/www/{{ php_pool }}/tmp
     state: directory
     mode: 01777
+    setype: httpd_tmp_t
 
 - name: special tmp directories for {{ servername }}
   file:
     path: /var/www/{{ php_pool }}/tmp/{{ item }}
     state: directory
     mode: 01777
+    setype: httpd_tmp_t
   with_items:
     - session
     - wsdlcache
