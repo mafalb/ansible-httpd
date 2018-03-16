@@ -4,42 +4,11 @@
     name: httpd24
     state: installed
 
-- name: logical volume for apache exists
-  lvol:
-    lv: www
-    vg: lvm.{{inventory_hostname}}
-    size: 1g
-
-- name: create filesystem for apache
-  filesystem:
-    dev: /dev/lvm.{{inventory_hostname}}/www
-    fstype: xfs
-
-- name: mount point exists
-  file:
-    path: /var/www
-    state: directory
-    setype: httpd_sys_content_t
-
-- name: mount apache partition
-  mount:
-    src: /dev/lvm.{{inventory_hostname}}/www
-    path: /var/www
-    state: mounted
-    fstype: xfs
-    opts: defaults,nodev,nosuid
-
-- name: mount point exists
-  file:
-    path: /var/www
-    state: directory
-    setype: httpd_sys_content_t
-
-- name: resize data filesystem for apache
-  filesystem:
-    dev: /dev/lvm.{{inventory_hostname}}/www
-    fstype: xfs
-    resizefs: yes
+- name: storage is managed, i.e. lvm, filesystems
+  include_role:
+    name: apache
+    tasks_from: storage
+  when: manage_storage
 
 - name: symlink in /etc
   file:
