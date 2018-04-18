@@ -2,5 +2,5 @@
 
 - name: reload apache
   service:
-    name: httpd24-httpd
+    name: "{{ apache.service }}"
     state: reloaded

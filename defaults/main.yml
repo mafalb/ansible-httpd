@@ -1,3 +1,8 @@
 ---
 
 manage_storage: no
+apache:
+  package: httpd
+  service: httpd
+  etc: /etc/httpd
+  port: 80
