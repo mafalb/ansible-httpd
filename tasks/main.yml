@@ -4,26 +4,40 @@
     name: "{{ apache.package }}"
     state: installed
 
+- debug: var=apache.manage_config
+  tags:
+    - debug
+
 - name: httpd main config
   notify: reload apache
   template:
     src: httpd.conf.j2
     dest: "{{ apache.etc }}/conf/httpd.conf"
     backup: true
+  when: apache.manage_config == true
+
+- name: core.conf
+  template:
+    src: core.conf.j2
+    dest: "{{ apache.etc }}/conf.d/core.conf"
+    backup: true
+  when: apache.manage_config|bool == true
 
 - name: directory for vhost config
   file:
     path: "{{ apache.etc }}/conf.vhosts.d"
     state: directory
-
-- name: apache is running
-  service:
-    name: "{{ apache.service }}"
-    state: started
-    enabled: true
+  when: apache.manage_config|bool == true
 
 - name: vhosts.conf
   template:
     src: vhosts.conf
     dest: "{{ apache.etc }}/conf.d/vhosts.conf"
   notify: reload apache
+  when: apache.manage_config|bool == true
+
+- name: apache is running
+  service:
+    name: "{{ apache.service }}"
+    state: started
+    enabled: true

@@ -6,3 +6,4 @@ apache:
   service: httpd
   etc: /etc/httpd
   port: 80
+  manage_config: true
