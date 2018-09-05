@@ -7,3 +7,4 @@ apache:
   etc: /etc/httpd
   port: 80
   manage_config: true
+  additional_ports: {}

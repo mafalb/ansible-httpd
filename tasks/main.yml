@@ -9,12 +9,20 @@
     - debug
 
 - name: httpd main config
-  notify: reload apache
+  when: apache.manage_config and not apache.external_config_file
   template:
     src: httpd.conf.j2
     dest: "{{ apache.etc }}/conf/httpd.conf"
     backup: true
-  when: apache.manage_config == true
+  notify: reload apache
+
+- name: httpd main config
+  when: apache.manage_config and apache.external_config_file
+  template:
+    src: "{{ playbook_dir }}/{{ apache.external_config_file }}"
+    dest: "{{ apache.etc }}/conf/httpd.conf"
+    backup: true
+  notify: reload apache
 
 - name: core.conf
   template:
