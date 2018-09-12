@@ -4,8 +4,24 @@
     name: "{{ apache.package }}"
     state: installed
 
+- name: get httpd version
+  command: httpd -v
+  changed_when: false
+  check_mode: no
+  register: _apache_version
+
+- name: Create apache_version variable.
+  set_fact:
+    apache_version: "{{ _apache_version.stdout.split()[2].split('/')[1] }}"
+
+- debug: var=apache_version
+  tags:
+    - never
+    - debug
+
 - debug: var=apache.manage_config
   tags:
+    - never
     - debug
 
 - name: httpd main config
@@ -24,18 +40,27 @@
     backup: true
   notify: reload apache
 
+- debug: var=apache
+  tags:
+    - never
+    - debug
+
 - name: core.conf
+  when:
+    - apache.manage_config|bool == true
+    - not apache.external_config.core
   template:
     src: core.conf.j2
     dest: "{{ apache.etc }}/conf.d/core.conf"
     backup: true
-  when: apache.manage_config|bool == true
 
 - name: directory for vhost config
+  when: apache.manage_config|bool == true
   file:
     path: "{{ apache.etc }}/conf.vhosts.d"
     state: directory
-  when: apache.manage_config|bool == true
+  notify: reload apache
+
 
 - name: vhosts.conf
   template:
@@ -43,6 +68,13 @@
     dest: "{{ apache.etc }}/conf.d/vhosts.conf"
   notify: reload apache
   when: apache.manage_config|bool == true
+
+- name: make the Include directive happy
+  copy:
+    content: "# gugu\n"
+    dest: "{{ apache.etc }}/conf.vhosts.d/default.conf"
+    force: false
+  notify: reload apache
 
 - name: apache is running
   service:

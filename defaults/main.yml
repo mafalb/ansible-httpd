@@ -8,3 +8,6 @@ apache:
   port: 80
   manage_config: true
   additional_ports: {}
+  external_config_file: false
+  external_config:
+    core: false
